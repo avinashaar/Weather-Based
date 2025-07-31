@@ -1,5 +1,6 @@
 "use client";
 import { useWeather } from "@/context/WeatherContext";
+import { useEffect, useState } from "react";
 
 function getOutfitRecommendation(condition: string, temp: number) {
   if (condition.toLowerCase().includes("rain")) return "Take an umbrella!";
@@ -10,18 +11,42 @@ function getOutfitRecommendation(condition: string, temp: number) {
 
 export default function WeatherCard() {
   const { weather } = useWeather();
-  if (!weather)
+  const [visible, setVisible] = useState(false);
+  const [displayedWeather, setDisplayedWeather] = useState<
+    typeof weather | null
+  >(null);
+
+  useEffect(() => {
+    if (weather) {
+      setVisible(false);
+
+      const timer = setTimeout(() => {
+        setDisplayedWeather(weather);
+        setVisible(true);
+      }, 300);
+
+      return () => clearTimeout(timer);
+    }
+  }, [weather]);
+
+  if (!displayedWeather)
     return <p className="text-gray-500">Search a city to see weather.</p>;
 
   return (
-    <div className="p-4 border rounded shadow bg-white dark:bg-gray-800 transition">
-      <h2 className="text-2xl font-bold">{weather.city}</h2>
-      <p>Temp: {weather.temp}°C</p>
-      <p>Condition: {weather.condition}</p>
-      <p>Wind: {weather.wind} m/s</p>
-      <p>Humidity: {weather.humidity}%</p>
+    <div
+      className={`p-4 border rounded shadow bg-white dark:bg-gray-800 transform transition-all duration-300 ease-in-out 
+        ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
+    >
+      <h2 className="text-2xl font-bold">{displayedWeather.city}</h2>
+      <p>Temp: {displayedWeather.temp}°C</p>
+      <p>Condition: {displayedWeather.condition}</p>
+      <p>Wind: {displayedWeather.wind} m/s</p>
+      <p>Humidity: {displayedWeather.humidity}%</p>
       <p className="mt-2 font-semibold">
-        {getOutfitRecommendation(weather.condition, weather.temp)}
+        {getOutfitRecommendation(
+          displayedWeather.condition,
+          displayedWeather.temp
+        )}
       </p>
     </div>
   );
