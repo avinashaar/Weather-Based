@@ -2,11 +2,13 @@
 import { useState, useEffect } from "react";
 import { useWeather } from "@/context/WeatherContext";
 import { fetchWeather } from "@/lib/weatherApi";
+import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 
 export default function SearchBar() {
   const [query, setQuery] = useState("");
   const [error, setError] = useState("");
   const { setWeather, addToHistory } = useWeather();
+  const { isOffline } = useNetworkStatus();
 
   useEffect(() => {
     setError("");
@@ -37,9 +39,10 @@ export default function SearchBar() {
       />
       <button
         onClick={() => handleSearch(query)}
-        className="bg-blue-500 text-white py-2 rounded hover:bg-blue-600"
+        disabled={isOffline || query?.length === 0}
+        className="bg-blue-500 text-white py-2 rounded hover:bg-blue-600 disabled:bg-gray-600"
       >
-        Search
+        {isOffline ? "Look like you network is down, Please check" : "Search"}
       </button>
       {error && <p className="text-red-500">{error}</p>}
     </div>
