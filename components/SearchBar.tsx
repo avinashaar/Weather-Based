@@ -5,10 +5,11 @@ import { fetchWeather } from "@/lib/weatherApi";
 import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 
 export default function SearchBar() {
-  const [query, setQuery] = useState("");
-  const [error, setError] = useState("");
   const { setWeather, addToHistory } = useWeather();
   const { isOffline } = useNetworkStatus();
+  const [loading, setLoading] = useState(false);
+  const [query, setQuery] = useState("");
+  const [error, setError] = useState("");
 
   useEffect(() => {
     setError("");
@@ -17,10 +18,13 @@ export default function SearchBar() {
   const handleSearch = async (city: string) => {
     setError("");
     try {
+      setLoading(true);
       const data = await fetchWeather(city);
       setWeather(data);
       addToHistory(city);
+      setLoading(false);
     } catch (error) {
+      setLoading(false);
       if (error instanceof Error) {
         setError(error.message);
       } else {
@@ -40,7 +44,7 @@ export default function SearchBar() {
       />
       <button
         onClick={() => handleSearch(query)}
-        disabled={isOffline || query?.length === 0}
+        disabled={isOffline || query?.length === 0 || loading}
         className="bg-blue-500 text-white py-2 rounded hover:bg-blue-600 disabled:bg-gray-600"
       >
         {isOffline ? "Look like you network is down, Please check" : "Search"}
