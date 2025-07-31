@@ -15,6 +15,7 @@ export default function SearchBar() {
   }, [query]);
 
   const handleSearch = async (city: string) => {
+    setError("");
     try {
       const data = await fetchWeather(city);
       setWeather(data);
